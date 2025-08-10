@@ -61,9 +61,7 @@ def apply_styles():
             .main { background-color: #FFFFFF; }
             
             /* --- НОВЫЕ ПРАВИЛА ДЛЯ "КОРОБКИ" С КНОПКАМИ --- */
-            .main-menu-container {
-                /* 1. Задаем ширину "коробки" в 80% от экрана */
-                width: 80%; 
+            
                 
                 /* 2. Ставим "коробку" ровно по центру с помощью магии auto-отступов */
                 margin-left: auto;
@@ -76,11 +74,7 @@ def apply_styles():
             }
             
             /* --- НОВЫЕ ПРАВИЛА ДЛЯ САМИХ КНОПОК ВНУТРИ "КОРОБКИ" --- */
-            .main-menu-container .stButton button {
-                /* Заставляем каждую кнопку растянуться на 100% ширины своей "коробки" */
-                width: 100%; 
-                margin-bottom: 15px; /* Оставляем красивый отступ снизу */
-            }
+            
 
             /* --- ПРАВИЛА ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ (ТЕЛЕФОНОВ) --- */
             /* Эта инструкция сработает, только если ширина экрана 600px или меньше */
@@ -177,14 +171,42 @@ def generate_report_text(main_product, toggles):
     return "\n".join(report_lines)
 
 # --- Страницы приложения ---
+# НОВАЯ, НАДЕЖНАЯ ВЕРСИЯ ФУНКЦИИ main_page
 def main_page():
     st.header("Выберите основной продукт")
-    st.markdown('<div class="main-menu-container">', unsafe_allow_html=True)
-    st.button("ДК", on_click=go_to_page, args=('dk',))
-    st.button("КК", on_click=go_to_page, args=('kk',))
-    st.button("МП", on_click=go_to_page, args=('mp',))
-    st.markdown('</div>', unsafe_allow_html=True)
 
+    # 1. Создаем наш "умный стеллаж" из трёх колонок.
+    # Мы делим ширину в пропорции 1:4:1.
+    # Это значит, что центральная колонка будет в 4 раза шире боковых.
+    # Боковые колонки будут пустыми "распорками".
+    left_space, main_content, right_space = st.columns([1, 4, 1])
+
+    # 2. Теперь мы говорим: "Всё, что дальше, клади в центральную колонку".
+    with main_content:
+        
+        # 3. Создаем наши кнопки.
+        # Ключевой параметр use_container_width=True заставляет кнопку
+        # растянуться на ВСЮ ширину своей колонки.
+        st.button(
+            "ДК", 
+            on_click=go_to_page, 
+            args=('dk',), 
+            use_container_width=True
+        )
+        
+        st.button(
+            "КК", 
+            on_click=go_to_page, 
+            args=('kk',), 
+            use_container_width=True
+        )
+        
+        st.button(
+            "МП", 
+            on_click=go_to_page, 
+            args=('mp',), 
+            use_container_width=True
+        )
 # Правильная версия страницы с продуктами
 def product_submenu_page(product_type, product_list):
     # 1. Сначала получаем записную книжку текущего пользователя
