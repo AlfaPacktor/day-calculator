@@ -1,91 +1,13 @@
 import streamlit as st
-import json
+from streamlit_clipboard import st_clipboard
 
 # --- НОВАЯ, БОЛЕЕ НАДЁЖНАЯ ФУНКЦИЯ ДЛЯ КОПИРОВАНИЯ ---
-def create_copy_button(text_to_copy):
-    """
-    Создает кастомную кнопку "Скопировать", которая работает в большинстве браузеров
-    и даже в небезопасном http-контексте.
-    """
-    # Уникальный ID для кнопки, чтобы JS точно знал, на что нажимать.
-    button_id = f"copy-btn-{hash(text_to_copy)}"
-    
-    # Превращаем текст в безопасный для JavaScript формат.
-    js_text = json.dumps(text_to_copy)
-
-    # Собираем HTML и JavaScript код. Логика внутри <script> изменилась!
-    button_html = f"""
-        <button id="{button_id}" style="
-            height: 50px;
-            width: 100%;
-            border: 1px solid #CCCCCC;
-            border-radius: 8px;
-            background-color: #FFFFFF;
-            color: #000000;
-            font-family: 'Calibri', sans-serif;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-        ">
-            Скопировать отчет
-        </button>
-
-        <script>
-            // Находим нашу кнопку по её уникальному ID
-            const button = document.getElementById('{button_id}');
-            
-            // Инструкция для кнопки: "Когда на тебя нажмут."
-            button.addEventListener('click', () => {{
-                // --- НАЧАЛО СТАРОМОДНОГО, НО НАДЁЖНОГО МЕТОДА ---
-
-                // 1. Создаем невидимое текстовое поле
-                const textArea = document.createElement('textarea');
-                
-                // 2. Кладём в него наш текст
-                textArea.value = {js_text};
-                
-                // 3. Делаем его абсолютно невидимым
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-9999px';
-                
-                // 4. Добавляем его на страницу
-                document.body.appendChild(textArea);
-                
-                // 5. Выделяем текст в этом поле
-                textArea.select();
-                
-                // 6. Даём команду "Копировать"!
-                try {{
-                    document.execCommand('copy');
-                    // Если всё получилось, меняем текст на кнопке
-                    button.innerText = 'Скопировано!';
-                }} catch (err) {{
-                    console.error('Ошибка при копировании: ', err);
-                    button.innerText = 'Ошибка!';
-                }}
-                
-                // 7. Сразу же удаляем невидимое поле, оно больше не нужно
-                document.body.removeChild(textArea);
-
-                // --- КОНЕЦ СТАРОМОДНОГО МЕТОДА ---
-
-                // Возвращаем текст кнопки обратно через 2 секунды
-                setTimeout(() => {{
-                    button.innerText = 'Скопировать отчет';
-                }}, 2000);
-            }});
-        </script>
-    """
-    # Отображаем нашу кнопку в приложении
-    st.markdown(button_html, unsafe_allow_html=True)
-
-
 # Страница Входа
-# ИСПРАВЛЕННАЯ Страница Входа
+
 def login_page():
     st.header("Вход или Регистрация")
     # Поле для ввода имени (логина). Оно теперь единственное.
-    username = st.text_input("Введите ваше имя (логин)")
+    username = st.text_input("Введите ваше имя (Например, Константинов Ярослав)")
 
     # Добавляем кнопку "Войти"
     if st.button("Войти / Зарегистрироваться"):
@@ -102,14 +24,14 @@ def login_page():
 
 # --- Данные о продуктах ---
 PRODUCTS_DK = [
-    "ДК", "Комбо/Кросс КК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
+    "ДК", "Акт", "Трз", "Комбо/Кросс КК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
     "Инвесткопилка", "БС со Стратегией", "Токенизация", "Накопительный Счет",
     "Вклад", "Детская Кросс", "Стикер Кросс", "Сим-Карта",
     "Селфи ДК", "Селфи КК"
 ]
 
 PRODUCTS_KK = [
-    "КК", "Кросс ДК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
+    "КК", "Акт", "Трз", "Кросс ДК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
     "Инвесткопилка", "БС со Стратегией", "Токенизация", "Накопительный Счет",
     "Вклад", "Детская Кросс", "Стикер Кросс", "Сим-Карта",
     "Селфи ДК"
@@ -130,43 +52,38 @@ PRODUCT_LISTS = {
 
 # --- Стили ---
 # ИСПРАВЛЕННАЯ ВЕРСИЯ ФУНКЦИИ. СКОПИРУЙТЕ И ЗАМЕНИТЕ ЕЮ СТАРУЮ.
+# ИСПРАВЛЕННАЯ ВЕРСИЯ ФУНКЦИИ СТИЛЕЙ. СКОПИРУЙТЕ И ЗАМЕНИТЕ ЕЮ СТАРУЮ.
 def apply_styles():
     st.markdown("""
         <style>
             .main { background-color: #FFFFFF; }
             
-            /* --- НОВЫЕ ПРАВИЛА ДЛЯ КОНТЕЙНЕРА КНОПОК --- */
-            .main-menu-container {
-                /* 1. Задаем ширину коробки */
-                width: 85%; 
+            /* --- НОВЫЕ ПРАВИЛА ДЛЯ "КОРОБКИ" С КНОПКАМИ --- */
+            
                 
-                /* 2. Ставим коробку ровно по центру */
+                /* 2. Ставим "коробку" ровно по центру с помощью магии auto-отступов */
                 margin-left: auto;
                 margin-right: auto;
                 margin-top: 20px;
 
-                /* 3. Ограничиваем максимальную ширину на больших экранах */
-                /* Чтобы кнопки не растягивались до бесконечности на 4K-мониторах */
+                /* 3. Ограничиваем максимальную ширину на очень больших экранах,
+                   чтобы кнопки не были гигантскими. */
                 max-width: 500px; 
             }
             
-            /* --- НОВЫЕ ПРАВИЛА ДЛЯ САМИХ КНОПОК ВНУТРИ КОНТЕЙНЕРА --- */
-            .main-menu-container .stButton button {
-                /* Заставляем кнопку занимать ВСЮ ширину своей коробки */
-                width: 100%; 
-                margin-bottom: 15px; /* Оставляем отступ снизу */
-            }
+            /* --- НОВЫЕ ПРАВИЛА ДЛЯ САМИХ КНОПОК ВНУТРИ "КОРОБКИ" --- */
+            
 
             /* --- ПРАВИЛА ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ (ТЕЛЕФОНОВ) --- */
             /* Эта инструкция сработает, только если ширина экрана 600px или меньше */
             @media (max-width: 600px) {
                 .main-menu-container {
-                    /* На маленьких экранах делаем коробку чуть шире для удобства */
+                    /* На маленьких экранах делаем "коробку" чуть шире для удобства */
                     width: 95%; 
                 }
             }
 
-            /* --- Остальные стили оставляем без изменений --- */
+            /* --- Остальные стили для других элементов оставляем без изменений --- */
             div.stButton > button {
                 height: 50px;
                 border: 1px solid #CCCCCC;
@@ -178,7 +95,7 @@ def apply_styles():
                 text-align: center;
             }
             div.stButton > button:hover {
-                background-color: #F0F0F0;
+                background-color: [jg:пароль_(regexp)_150]
                 border-color: #AAAAAA;
             }
             .stToggle { font-family: 'Calibri', sans-serif; color: #000000; }
@@ -252,14 +169,42 @@ def generate_report_text(main_product, toggles):
     return "\n".join(report_lines)
 
 # --- Страницы приложения ---
+# НОВАЯ, НАДЕЖНАЯ ВЕРСИЯ ФУНКЦИИ main_page
 def main_page():
     st.header("Выберите основной продукт")
-    st.markdown('<div class="main-menu-container">', unsafe_allow_html=True)
-    st.button("ДК", on_click=go_to_page, args=('dk',))
-    st.button("КК", on_click=go_to_page, args=('kk',))
-    st.button("МП", on_click=go_to_page, args=('mp',))
-    st.markdown('</div>', unsafe_allow_html=True)
 
+    # 1. Создаем наш "умный стеллаж" из трёх колонок.
+    # Мы делим ширину в пропорции 1:4:1.
+    # Это значит, что центральная колонка будет в 4 раза шире боковых.
+    # Боковые колонки будут пустыми "распорками".
+    left_space, main_content, right_space = st.columns([1, 4, 1])
+
+    # 2. Теперь мы говорим: "Всё, что дальше, клади в центральную колонку".
+    with main_content:
+        
+        # 3. Создаем наши кнопки.
+        # Ключевой параметр use_container_width=True заставляет кнопку
+        # растянуться на ВСЮ ширину своей колонки.
+        st.button(
+            "ДК", 
+            on_click=go_to_page, 
+            args=('dk',), 
+            use_container_width=True
+        )
+        
+        st.button(
+            "КК", 
+            on_click=go_to_page, 
+            args=('kk',), 
+            use_container_width=True
+        )
+        
+        st.button(
+            "МП", 
+            on_click=go_to_page, 
+            args=('mp',), 
+            use_container_width=True
+        )
 # Правильная версия страницы с продуктами
 def product_submenu_page(product_type, product_list):
     # 1. Сначала получаем записную книжку текущего пользователя
@@ -288,10 +233,9 @@ def product_submenu_page(product_type, product_list):
     with col2:
         st.button("Вернуться", on_click=go_to_main)
 
-# Правильная версия страницы отчета
-# ИСПРАВЛЕННАЯ ВЕРСИЯ страницы отчета
+# НОВАЯ, СУПЕР-НАДЕЖНАЯ ВЕРСИЯ СТРАНИЦЫ ОТЧЕТА
 def report_page():
-    # 1. Сначала получаем записную книжку текущего пользователя
+    # 1. Получаем записную книжку текущего пользователя
     user_state = get_user_state()
 
     st.header("Сформированный отчет")
@@ -299,19 +243,17 @@ def report_page():
     # 2. Берем текст отчета из ЕГО книжки
     report_text = user_state.get('report_text', "Отчет пуст.")
     
-    st.markdown(f"<div class='report-text'>{report_text}</div>", unsafe_allow_html=True)
-    st.write("") # Просто для отступа
+    # 3. Просто и наглядно показываем текст отчета
+    st.code(report_text)
+    st.write("---") # Добавим красивый разделитель
 
-    # Создаем две колонки для кнопок
-    col1, col2 = st.columns(2)
+    # 4. ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ!
+    # Мы просто вызываем наш новый компонент. Он сам создаст поле
+    # и кнопку "Copy" рядом с ним.
+    st_clipboard(report_text)
 
-    with col1:
-        # 3. ВЫЗЫВАЕМ НАШУ НОВУЮ ФУНКЦИЮ
-        create_copy_button(report_text)
-
-    with col2:
-        # Кнопка сброса остается как была, но теперь в своей колонке
-        st.button("Сбросить", on_click=reset_all, use_container_width=True)
+    # 5. Кнопку "Сбросить" оставляем, как и было.
+    st.button("Сбросить", on_click=reset_all)
 
 
 # --- Главная функция приложения ---
