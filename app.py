@@ -251,7 +251,9 @@ def report_page():
     # Мы просто вызываем наш новый компонент. Он сам создаст поле
     # и кнопку "Copy" рядом с ним.
     st.code(report_text)
-    st.button("Скопировать отчет"): clipboard.copy(report_text)
+    if st.button("Скопировать отчет"):
+    clipboard.copy(report_text)
+    st.success("Отчет скопирован в буфер обмена!")
     
     # 5. Кнопку "Сбросить" оставляем, как и было.
     st.button("Сбросить", on_click=reset_all)
