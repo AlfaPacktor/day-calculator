@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_clipboard import st_clipboard
+import clipboard
 
 # --- НОВАЯ, БОЛЕЕ НАДЁЖНАЯ ФУНКЦИЯ ДЛЯ КОПИРОВАНИЯ ---
 # Страница Входа
@@ -250,8 +250,9 @@ def report_page():
     # 4. ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ!
     # Мы просто вызываем наш новый компонент. Он сам создаст поле
     # и кнопку "Copy" рядом с ним.
-    st_clipboard(report_text)
-
+    st.code(report_text)
+    st.button("Скопировать отчет"): clipboard.copy(report_text)
+    
     # 5. Кнопку "Сбросить" оставляем, как и было.
     st.button("Сбросить", on_click=reset_all)
 
