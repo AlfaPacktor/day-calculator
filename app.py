@@ -1,83 +1,7 @@
 import streamlit as st
-import json
 
 # --- НОВАЯ, БОЛЕЕ НАДЁЖНАЯ ФУНКЦИЯ ДЛЯ КОПИРОВАНИЯ ---
-def create_copy_button(text_to_copy):
-    """
-    Создает кастомную кнопку "Скопировать", которая работает в большинстве браузеров
-    и даже в небезопасном http-контексте.
-    """
-    # Уникальный ID для кнопки, чтобы JS точно знал, на что нажимать.
-    button_id = f"copy-btn-{hash(text_to_copy)}"
-    
-    # Превращаем текст в безопасный для JavaScript формат.
-    js_text = json.dumps(text_to_copy)
 
-    # Собираем HTML и JavaScript код. Логика внутри <script> изменилась!
-    button_html = f"""
-        <button id="{button_id}" style="
-            height: 50px;
-            width: 100%;
-            border: 1px solid #CCCCCC;
-            border-radius: 8px;
-            background-color: #FFFFFF;
-            color: #000000;
-            font-family: 'Calibri', sans-serif;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-        ">
-            Скопировать отчет
-        </button>
-
-        <script>
-            // Находим нашу кнопку по её уникальному ID
-            const button = document.getElementById('{button_id}');
-            
-            // Инструкция для кнопки: "Когда на тебя нажмут."
-            button.addEventListener('click', () => {{
-                // --- НАЧАЛО СТАРОМОДНОГО, НО НАДЁЖНОГО МЕТОДА ---
-
-                // 1. Создаем невидимое текстовое поле
-                const textArea = document.createElement('textarea');
-                
-                // 2. Кладём в него наш текст
-                textArea.value = {js_text};
-                
-                // 3. Делаем его абсолютно невидимым
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-9999px';
-                
-                // 4. Добавляем его на страницу
-                document.body.appendChild(textArea);
-                
-                // 5. Выделяем текст в этом поле
-                textArea.select();
-                
-                // 6. Даём команду "Копировать"!
-                try {{
-                    document.execCommand('copy');
-                    // Если всё получилось, меняем текст на кнопке
-                    button.innerText = 'Скопировано!';
-                }} catch (err) {{
-                    console.error('Ошибка при копировании: ', err);
-                    button.innerText = 'Ошибка!';
-                }}
-                
-                // 7. Сразу же удаляем невидимое поле, оно больше не нужно
-                document.body.removeChild(textArea);
-
-                // --- КОНЕЦ СТАРОМОДНОГО МЕТОДА ---
-
-                // Возвращаем текст кнопки обратно через 2 секунды
-                setTimeout(() => {{
-                    button.innerText = 'Скопировать отчет';
-                }}, 2000);
-            }});
-        </script>
-    """
-    # Отображаем нашу кнопку в приложении
-    st.markdown(button_html, unsafe_allow_html=True)
 
 
 # Страница Входа
@@ -290,6 +214,7 @@ def product_submenu_page(product_type, product_list):
 
 # Правильная версия страницы отчета
 # ИСПРАВЛЕННАЯ ВЕРСИЯ страницы отчета
+# ИСПРАВЛЕННАЯ И ПРОСТАЯ ВЕРСИЯ СТРАНИЦЫ ОТЧЕТА
 def report_page():
     # 1. Сначала получаем записную книжку текущего пользователя
     user_state = get_user_state()
@@ -299,19 +224,18 @@ def report_page():
     # 2. Берем текст отчета из ЕГО книжки
     report_text = user_state.get('report_text', "Отчет пуст.")
     
-    st.markdown(f"<div class='report-text'>{report_text}</div>", unsafe_allow_html=True)
-    st.write("") # Просто для отступа
+    # 3. ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ!
+    # Мы используем стандартный элемент Streamlit "текстовое поле".
+    # Он идеально подходит для отображения и копирования текста.
+    st.text_area(
+        label="Отчет для копирования:", 
+        value=report_text, 
+        height=300, # Можете подобрать удобную высоту
+        help="Нажмите на текст, затем Ctrl+C (или Cmd+C), чтобы скопировать"
+    )
 
-    # Создаем две колонки для кнопок
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # 3. ВЫЗЫВАЕМ НАШУ НОВУЮ ФУНКЦИЮ
-        create_copy_button(report_text)
-
-    with col2:
-        # Кнопка сброса остается как была, но теперь в своей колонке
-        st.button("Сбросить", on_click=reset_all, use_container_width=True)
+    # 4. Кнопку "Сбросить" оставляем, но ей больше не нужны колонки.
+    st.button("Сбросить", on_click=reset_all)
 
 
 # --- Главная функция приложения ---
