@@ -1,46 +1,41 @@
 import streamlit as st
-import clipboard
+import time
+from datetime import datetime, timedelta
 
-# --- НОВАЯ, БОЛЕЕ НАДЁЖНАЯ ФУНКЦИЯ ДЛЯ КОПИРОВАНИЯ ---
-# Страница Входа
-
+# ИСПРАВЛЕННАЯ Страница Входа
 def login_page():
-    st.header("Вход или Регистрация")
-    # Поле для ввода имени (логина). Оно теперь единственное.
-    username = st.text_input("Введите ваше имя (Например, Константинов Ярослав)")
+    st.header("Добро пожаловать!")
+    username = st.text_input("Введите ваше имя (Например, [jg:person_107])")
 
-    # Добавляем кнопку "Войти"
-    if st.button("Войти / Зарегистрироваться"):
-        # Новая проверка: просто смотрим, ввел ли пользователь имя.
-        if username: # Если поле username не пустое
+    if st.button("Войти"):
+        if username:
             st.session_state['logged_in'] = True
             st.session_state['username'] = username
-            # st.rerun() перезагрузит страницу и покажет калькулятор.
-            # Ваша функция get_user_state() сама создаст "личный блокнот", если нужно.
+            # Устанавливаем время входа (timestamp)
+            st.session_state['login_time'] = time.time()
             st.rerun()
         else:
-            # Если пользователь ничего не ввел, вежливо просим его это сделать.
             st.warning("Пожалуйста, введите имя, чтобы продолжить.")
 
 # --- Данные о продуктах ---
 PRODUCTS_DK = [
-    "ДК", "Акт", "Трз", "Комбо/Кросс КК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
+    "ДК", "Акт", "Трз", "Комбо/Кросс КК Одобрено", "Комбо/Кросс КК Выдано", "Трз.", "ЦП", "Гос.Уведомления", "Смарт", "Кешбек", "ЖКУ", "БС",
     "Инвесткопилка", "БС со Стратегией", "Токенизация", "Накопительный Счет",
-    "Вклад", "Детская Кросс", "Стикер Кросс", "Сим-Карта",
+    "Вклад", "Детская Кросс", "Сим-Карта", "Перевод Пенсии",
     "Селфи ДК", "Селфи КК"
 ]
 
 PRODUCTS_KK = [
-    "КК", "Акт", "Трз", "Кросс ДК", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС",
+    "КК", "Акт", "Трз", "Кросс ДК", "ЦП", "Гос.Уведомления", "Смарт", "Кешбек", "ЖКУ", "БС",
     "Инвесткопилка", "БС со Стратегией", "Токенизация", "Накопительный Счет",
-    "Вклад", "Детская Кросс", "Стикер Кросс", "Сим-Карта",
+    "Вклад", "Детская Кросс", "Стикер Кросс", "Сим-Карта", "Перевод Пенсии",
     "Селфи ДК"
 ]
 
 PRODUCTS_MP = [
-    "МП", "ЦП", "Смарт", "Кешбек", "ЖКУ", "БС", "Инвесткопилка",
+    "МП", "ЦП", "Гос.Уведомления", "Смарт", "Кешбек", "ЖКУ", "БС", "Инвесткопилка",
     "БС со Стратегией", "Токенизация", "Накопительный Счет", "Вклад",
-    "Детская Кросс", "Стикер Кросс", "Сим-Карта", "Кросс ДК",
+    "Детская Кросс", "Стикер Кросс", "Сим-Карта", "Перевод Пенсии", "Кросс ДК",
     "Селфи ДК", "Селфи КК"
 ]
 
@@ -51,39 +46,11 @@ PRODUCT_LISTS = {
 }
 
 # --- Стили ---
-# ИСПРАВЛЕННАЯ ВЕРСИЯ ФУНКЦИИ. СКОПИРУЙТЕ И ЗАМЕНИТЕ ЕЮ СТАРУЮ.
-# ИСПРАВЛЕННАЯ ВЕРСИЯ ФУНКЦИИ СТИЛЕЙ. СКОПИРУЙТЕ И ЗАМЕНИТЕ ЕЮ СТАРУЮ.
 def apply_styles():
     st.markdown("""
         <style>
             .main { background-color: #FFFFFF; }
             
-            /* --- НОВЫЕ ПРАВИЛА ДЛЯ "КОРОБКИ" С КНОПКАМИ --- */
-            
-                
-                /* 2. Ставим "коробку" ровно по центру с помощью магии auto-отступов */
-                margin-left: auto;
-                margin-right: auto;
-                margin-top: 20px;
-
-                /* 3. Ограничиваем максимальную ширину на очень больших экранах,
-                   чтобы кнопки не были гигантскими. */
-                max-width: 500px; 
-            }
-            
-            /* --- НОВЫЕ ПРАВИЛА ДЛЯ САМИХ КНОПОК ВНУТРИ "КОРОБКИ" --- */
-            
-
-            /* --- ПРАВИЛА ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ (ТЕЛЕФОНОВ) --- */
-            /* Эта инструкция сработает, только если ширина экрана 600px или меньше */
-            @media (max-width: 600px) {
-                .main-menu-container {
-                    /* На маленьких экранах делаем "коробку" чуть шире для удобства */
-                    width: 95%; 
-                }
-            }
-
-            /* --- Остальные стили для других элементов оставляем без изменений --- */
             div.stButton > button {
                 height: 50px;
                 border: 1px solid #CCCCCC;
@@ -95,35 +62,73 @@ def apply_styles():
                 text-align: center;
             }
             div.stButton > button:hover {
-                background-color: [jg:пароль_(regexp)_150]
+                background-color: [jg:пароль_(regexp)_108]
                 border-color: #AAAAAA;
             }
             .stToggle { font-family: 'Calibri', sans-serif; color: #000000; }
-            .report-text {
-                font-family: 'Calibri', sans-serif;
-                font-size: 16px;
-                line-height: 1.8;
-                border: 1px solid #DDDDDD;
-                padding: 15px;
-                border-radius: 8px;
-                white-space: pre-wrap;
-                background-color: #FAFAFA;
+            .session-info {
+                background-color: [jg:пароль_(regexp)_109]
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 10px;
+                font-size: 14px;
+                color: #666;
             }
         </style>
     """, unsafe_allow_html=True)
 
-# --- Логика состояний (сессии) для МНОГИХ пользователей ---
+# --- Функция проверки сессии ---
+def check_session_validity():
+    """Проверяет, не истекла ли сессия (24 часа)"""
+    if 'login_time' not in st.session_state:
+        return False
+    
+    current_time = time.time()
+    login_time = st.session_state.get('login_time', 0)
+    
+    # 24 часа = 24 * 60 * 60 = 86400 секунд
+    session_duration = 24 * 60 * 60
+    
+    if current_time - login_time > session_duration:
+        # Сессия истекла
+        st.session_state['logged_in'] = False
+        st.session_state['username'] = None
+        st.session_state.pop('login_time', None)
+        return False
+    
+    return True
+
+def get_session_time_left():
+    """Возвращает оставшееся время сессии в читаемом формате"""
+    if 'login_time' not in st.session_state:
+        return "Неизвестно"
+    
+    current_time = time.time()
+    login_time = st.session_state.get('login_time', 0)
+    session_duration = 24 * 60 * 60
+    
+    time_left = session_duration - (current_time - login_time)
+    
+    if time_left <= 0:
+        return "Сессия истекла"
+    
+    hours = int(time_left // 3600)
+    minutes = int((time_left % 3600) // 60)
+    
+    return f"{hours}ч {minutes}мин"
+
+# --- Логика состояний ---
 def initialize_global_state():
-    # Это создает "полку" для хранения блокнотов всех пользователей
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
     if 'username' not in st.session_state:
         st.session_state['username'] = None
     if 'user_data' not in st.session_state:
         st.session_state['user_data'] = {}
+    if 'login_time' not in st.session_state:
+        st.session_state['login_time'] = None
 
 def get_user_state():
-    # Эта функция находит на "полке" личный блокнот текущего сотрудника
     username = st.session_state['username']
     if username not in st.session_state['user_data']:
         st.session_state['user_data'][username] = {
@@ -134,31 +139,34 @@ def get_user_state():
     return st.session_state['user_data'][username]
 
 def logout():
-    # Эта функция "закрывает сессию" - отправляет пользователя обратно к экрану входа
     st.session_state['logged_in'] = False
     st.session_state['username'] = None
+    st.session_state.pop('login_time', None)
     st.rerun()
 
-# --- Функции для переключения страниц (НОВЫЕ ВЕРСИИ) ---
+def extend_session():
+    """Продлевает сессию на 24 часа"""
+    st.session_state['login_time'] = time.time()
+    st.success("Сессия продлена на 24 часа!")
+    time.sleep(1)
+    st.rerun()
+
+# --- Функции для переключения страниц ---
 def go_to_page(page_name):
-    # Теперь эта функция меняет страницу в ЛИЧНОМ блокноте пользователя
     user_state = get_user_state()
     user_state['toggles'] = {}
     user_state['page'] = page_name
 
 def go_to_main():
-    # То же самое для возврата на главную
     user_state = get_user_state()
     user_state['toggles'] = {}
     user_state['page'] = 'main'
 
 def reset_all():
-    # И сброс работает только для текущего пользователя
     user_state = get_user_state()
     user_state['page'] = 'main'
     user_state['toggles'] = {}
     user_state['report_text'] = ""
-
 
 # --- Логика генерации отчета ---
 def generate_report_text(main_product, toggles):
@@ -168,64 +176,51 @@ def generate_report_text(main_product, toggles):
     report_lines = [f"{product} {'+' if toggles.get(product, False) else '-'}" for product in product_list]
     return "\n".join(report_lines)
 
+# --- Компонент информации о сессии ---
+def display_session_info():
+    time_left = get_session_time_left()
+    login_time = datetime.fromtimestamp(st.session_state.get('login_time', 0))
+    
+    col1, col2, col3 = st.columns([2, 2, 1])
+    
+    with col1:
+        st.markdown(f'<div class="session-info">👤 Пользователь: {st.session_state["username"]}</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f'<div class="session-info">⏰ Осталось времени: {time_left}</div>', unsafe_allow_html=True)
+    
+    with col3:
+        if st.button("Продлить", help="Продлить сессию на 24 часа"):
+            extend_session()
+
 # --- Страницы приложения ---
-# НОВАЯ, НАДЕЖНАЯ ВЕРСИЯ ФУНКЦИИ main_page
 def main_page():
     st.header("Выберите основной продукт")
 
-    # 1. Создаем наш "умный стеллаж" из трёх колонок.
-    # Мы делим ширину в пропорции 1:4:1.
-    # Это значит, что центральная колонка будет в 4 раза шире боковых.
-    # Боковые колонки будут пустыми "распорками".
     left_space, main_content, right_space = st.columns([1, 4, 1])
 
-    # 2. Теперь мы говорим: "Всё, что дальше, клади в центральную колонку".
     with main_content:
-        
-        # 3. Создаем наши кнопки.
-        # Ключевой параметр use_container_width=True заставляет кнопку
-        # растянуться на ВСЮ ширину своей колонки.
-        st.button(
-            "ДК", 
-            on_click=go_to_page, 
-            args=('dk',), 
-            use_container_width=True
-        )
-        
-        st.button(
-            "КК", 
-            on_click=go_to_page, 
-            args=('kk',), 
-            use_container_width=True
-        )
-        
-        st.button(
-            "МП", 
-            on_click=go_to_page, 
-            args=('mp',), 
-            use_container_width=True
-        )
-# Правильная версия страницы с продуктами
+        st.button("ДК", on_click=go_to_page, args=('dk',), use_container_width=True)
+        st.button("КК", on_click=go_to_page, args=('kk',), use_container_width=True)
+        st.button("МП", on_click=go_to_page, args=('mp',), use_container_width=True)
+
 def product_submenu_page(product_type, product_list):
-    # 1. Сначала получаем записную книжку текущего пользователя
     user_state = get_user_state()
     
     st.header(f"Дополнительные продукты для «{product_type}»")
     
     for product in product_list:
-        # 2. Работаем с галочками из ЕГО книжки
         user_state['toggles'][product] = st.toggle(
             product,
             value=user_state['toggles'].get(product, False),
-            key=f"{st.session_state.username}_{product_type}_{product}" # Уникальный ключ для каждого пользователя!
+            key=f"{st.session_state['username']}_{product_type}_{product}"
         )
     
     st.divider()
     
-    col1, col2 = st.columns(2)
+    col1, col2 = [jg:пароль_(regexp)_110]
     with col1:
         if st.button("Сформировать отчет"):
-            # 3. Генерируем отчет на основе ЕГО галочек
             user_state['report_text'] = generate_report_text(product_type, user_state['toggles'])
             user_state['page'] = 'report'
             st.rerun()
@@ -233,48 +228,47 @@ def product_submenu_page(product_type, product_list):
     with col2:
         st.button("Вернуться", on_click=go_to_main)
 
-# НОВАЯ, ПОЛНОСТЬЮ ИСПРАВЛЕННАЯ ВЕРСИЯ report_page
 def report_page():
-    # 1. Получаем состояние текущего пользователя
     user_state = get_user_state()
 
     st.header("Сформированный отчет")
     
-    # 2. Берем текст отчета
     report_text = user_state.get('report_text', "Отчет пуст.")
     
-    # 3. Показываем текст отчета в блоке кода
-    st.code(report_text)
-    st.write("---")
+    st.text_area(
+        label="Отчет для копирования:", 
+        value=report_text, 
+        [jg:пароль_(regexp)_111]
+        help="Выделите текст и нажмите Ctrl+C (или Cmd+C), чтобы скопировать"
+    )
+    
+    st.info("💡 Выделите текст выше и используйте Ctrl+C (Windows) или Cmd+C (Mac) для копирования")
 
-    # 4. ВОТ ИСПРАВЛЕННЫЙ БЛОК КОПИРОВАНИЯ
-    if st.button("Скопировать отчет"):
-        clipboard.copy(report_text)
-        st.success("Отчет скопирован в буфер обмена!")
-
-    # 5. Кнопка "Сбросить"
     st.button("Сбросить", on_click=reset_all)
-
 
 # --- Главная функция приложения ---
 def main():
     apply_styles()
     initialize_global_state()
 
-    # Сначала проверяем, вошел ли пользователь в систему
-    if not st.session_state.get('logged_in'):
-        login_page() # Если не вошел, показываем страницу входа
-    else:
-        # Если вошел, то показываем калькулятор
-        
-        # Добавим сбоку имя пользователя и кнопку "Выйти" для удобства
-        st.sidebar.success(f"Вы вошли как: {st.session_state.username}")
-        st.sidebar.button("Выйти", on_click=logout)
+    # Проверяем валидность сессии
+    if st.session_state.get('logged_in', False) and not check_session_validity():
+        st.warning("Ваша сессия истекла. Пожалуйста, войдите снова.")
+        time.sleep(2)
+        st.rerun()
 
-        # Получаем личную "записную книжку" текущего пользователя
+    if not [jg:авторизационный_токен_112]('logged_in', False):
+        login_page()
+    else:
+        # Отображаем информацию о сессии
+        display_session_info()
+        
+        # Кнопка выхода
+        if st.button("Выйти", help="Завершить сессию"):
+            logout()
+
         user_state = get_user_state()
 
-        # А теперь показываем нужную страницу калькулятора
         if user_state['page'] == 'main':
             main_page()
         elif user_state['page'] == 'dk':
