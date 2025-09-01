@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 # ИСПРАВЛЕННАЯ Страница Входа
 def login_page():
     st.header("Добро пожаловать!")
-    username = st.text_input("Введите ваше имя (Например, [jg:person_107])")
+    username = st.text_input("Введите ваше имя (Например, [jg:person_120])")
 
     if st.button("Войти"):
         if username:
@@ -62,12 +62,12 @@ def apply_styles():
                 text-align: center;
             }
             div.stButton > button:hover {
-                background-color: [jg:пароль_(regexp)_108]
+                background-color: #F0F0F0;
                 border-color: #AAAAAA;
             }
             .stToggle { font-family: 'Calibri', sans-serif; color: #000000; }
             .session-info {
-                background-color: [jg:пароль_(regexp)_109]
+                background-color: #F8F9FA;
                 padding: 10px;
                 border-radius: 5px;
                 margin-bottom: 10px;
@@ -218,7 +218,7 @@ def product_submenu_page(product_type, product_list):
     
     st.divider()
     
-    col1, col2 = [jg:пароль_(regexp)_110]
+    col1, col2 = st.columns(2)
     with col1:
         if st.button("Сформировать отчет"):
             user_state['report_text'] = generate_report_text(product_type, user_state['toggles'])
@@ -238,7 +238,7 @@ def report_page():
     st.text_area(
         label="Отчет для копирования:", 
         value=report_text, 
-        [jg:пароль_(regexp)_111]
+        height=300,
         help="Выделите текст и нажмите Ctrl+C (или Cmd+C), чтобы скопировать"
     )
     
@@ -257,7 +257,7 @@ def main():
         time.sleep(2)
         st.rerun()
 
-    if not [jg:авторизационный_токен_112]('logged_in', False):
+    if not st.session_state.get('logged_in', False):
         login_page()
     else:
         # Отображаем информацию о сессии
