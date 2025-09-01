@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 # ИСПРАВЛЕННАЯ Страница Входа
 def login_page():
     st.header("Добро пожаловать!")
-    username = st.text_input("Введите ваше имя (Например, [jg:person_120])")
+    username = st.text_input("Введите ваше имя (Например, Константинов Ярослав")
 
     if st.button("Войти"):
         if username:
