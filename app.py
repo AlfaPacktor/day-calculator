@@ -1,6 +1,5 @@
 import streamlit as st
-import time
-from datetime import datetime, timedelta
+from st_copy_to_clipboard import st_copy_to_clipboard
 
 # ИСПРАВЛЕННАЯ Страница Входа
 def login_page():
@@ -11,8 +10,6 @@ def login_page():
         if username:
             st.session_state['logged_in'] = True
             st.session_state['username'] = username
-            # Устанавливаем время входа (timestamp)
-            st.session_state['login_time'] = time.time()
             st.rerun()
         else:
             st.warning("Пожалуйста, введите имя, чтобы продолжить.")
@@ -66,56 +63,8 @@ def apply_styles():
                 border-color: #AAAAAA;
             }
             .stToggle { font-family: 'Calibri', sans-serif; color: #000000; }
-            .session-info {
-                background-color: #F8F9FA;
-                padding: 10px;
-                border-radius: 5px;
-                margin-bottom: 10px;
-                font-size: 14px;
-                color: #666;
-            }
         </style>
     """, unsafe_allow_html=True)
-
-# --- Функция проверки сессии ---
-def check_session_validity():
-    """Проверяет, не истекла ли сессия (24 часа)"""
-    if 'login_time' not in st.session_state:
-        return False
-    
-    current_time = time.time()
-    login_time = st.session_state.get('login_time', 0)
-    
-    # 24 часа = 24 * 60 * 60 = 86400 секунд
-    session_duration = 24 * 60 * 60
-    
-    if current_time - login_time > session_duration:
-        # Сессия истекла
-        st.session_state['logged_in'] = False
-        st.session_state['username'] = None
-        st.session_state.pop('login_time', None)
-        return False
-    
-    return True
-
-def get_session_time_left():
-    """Возвращает оставшееся время сессии в читаемом формате"""
-    if 'login_time' not in st.session_state:
-        return "Неизвестно"
-    
-    current_time = time.time()
-    login_time = st.session_state.get('login_time', 0)
-    session_duration = 24 * 60 * 60
-    
-    time_left = session_duration - (current_time - login_time)
-    
-    if time_left <= 0:
-        return "Сессия истекла"
-    
-    hours = int(time_left // 3600)
-    minutes = int((time_left % 3600) // 60)
-    
-    return f"{hours}ч {minutes}мин"
 
 # --- Логика состояний ---
 def initialize_global_state():
@@ -125,8 +74,6 @@ def initialize_global_state():
         st.session_state['username'] = None
     if 'user_data' not in st.session_state:
         st.session_state['user_data'] = {}
-    if 'login_time' not in st.session_state:
-        st.session_state['login_time'] = None
 
 def get_user_state():
     username = st.session_state['username']
@@ -141,14 +88,6 @@ def get_user_state():
 def logout():
     st.session_state['logged_in'] = False
     st.session_state['username'] = None
-    st.session_state.pop('login_time', None)
-    st.rerun()
-
-def extend_session():
-    """Продлевает сессию на 24 часа"""
-    st.session_state['login_time'] = time.time()
-    st.success("Сессия продлена на 24 часа!")
-    time.sleep(1)
     st.rerun()
 
 # --- Функции для переключения страниц ---
@@ -175,23 +114,6 @@ def generate_report_text(main_product, toggles):
         return ""
     report_lines = [f"{product} {'+' if toggles.get(product, False) else '-'}" for product in product_list]
     return "\n".join(report_lines)
-
-# --- Компонент информации о сессии ---
-def display_session_info():
-    time_left = get_session_time_left()
-    login_time = datetime.fromtimestamp(st.session_state.get('login_time', 0))
-    
-    col1, col2, col3 = st.columns([2, 2, 1])
-    
-    with col1:
-        st.markdown(f'<div class="session-info">👤 Пользователь: {st.session_state["username"]}</div>', unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f'<div class="session-info">⏰ Осталось времени: {time_left}</div>', unsafe_allow_html=True)
-    
-    with col3:
-        if st.button("Продлить", help="Продлить сессию на 24 часа"):
-            extend_session()
 
 # --- Страницы приложения ---
 def main_page():
@@ -235,14 +157,21 @@ def report_page():
     
     report_text = user_state.get('report_text', "Отчет пуст.")
     
-    st.text_area(
-        label="Отчет для копирования:", 
-        value=report_text, 
-        height=300,
-        help="Выделите текст и нажмите Ctrl+C (или Cmd+C), чтобы скопировать"
-    )
+    # Заголовок и кнопка копирования в одной строке
+    col1, col2 = st.columns([4, 1])
     
-    st.info("💡 Выделите текст выше и используйте Ctrl+C (Windows) или Cmd+C (Mac) для копирования")
+    with col1:
+        st.subheader("📋 Отчет для копирования:")
+    
+    with col2:
+        # Красивая кнопка копирования от st-copy-to-clipboard
+        if st_copy_to_clipboard(report_text, before_copy_label="📋 Копировать", after_copy_label="✅ Скопировано!"):
+            st.success("Отчет скопирован в буфер обмена!")
+    
+    # Блок с кодом (также имеет встроенный значок копирования)
+    st.code(report_text, language=None)
+    
+    st.info("💡 Используйте кнопку '📋 Копировать' выше или значок копирования в правом углу блока")
 
     st.button("Сбросить", on_click=reset_all)
 
@@ -251,21 +180,11 @@ def main():
     apply_styles()
     initialize_global_state()
 
-    # Проверяем валидность сессии
-    if st.session_state.get('logged_in', False) and not check_session_validity():
-        st.warning("Ваша сессия истекла. Пожалуйста, войдите снова.")
-        time.sleep(2)
-        st.rerun()
-
     if not st.session_state.get('logged_in', False):
         login_page()
     else:
-        # Отображаем информацию о сессии
-        display_session_info()
-        
-        # Кнопка выхода
-        if st.button("Выйти", help="Завершить сессию"):
-            logout()
+        st.write(f"Вы вошли как: {st.session_state['username']}")
+        st.button("Выйти", on_click=logout)
 
         user_state = get_user_state()
 
